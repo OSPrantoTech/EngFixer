@@ -1,8 +1,10 @@
+/* EngFixer Pro - Full Stylesheet */
+
 body {
-    width: 350px;
+    width: 380px; /* এক্সটেনশনের পপ-আপ সাইজ ফিক্সড */
     margin: 0;
     padding: 15px;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f7f6;
 }
 
@@ -11,40 +13,120 @@ body {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+h1 {
+    font-size: 22px;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    text-align: center;
 }
 
 #editor {
-    min-height: 180px;
+    min-height: 200px;
+    max-height: 300px;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     padding: 12px;
-    font-size: 15px;
+    font-size: 16px;
+    line-height: 1.6;
     background: #fff;
     outline: none;
     overflow-y: auto;
-    white-space: pre-wrap; /* টেক্সট ফরম্যাট ঠিক রাখার জন্য */
+    white-space: pre-wrap;
+    position: relative;
 }
 
+#editor:focus {
+    border-color: #3498db;
+}
+
+/* প্লেসহোল্ডার স্টাইল */
 #editor:empty:before {
-    content: "Start typing here...";
+    content: attr(placeholder);
     color: #bdc3c7;
+    pointer-events: none;
 }
 
-/* রেড আন্ডারলাইন ফিক্স */
-.error-underline {
-    border-bottom: 2px wavy #ff0000 !important;
-    text-decoration: none !important;
-    display: inline-block;
+/* গ্রামার ভুলের হাইলাইট - কালার বাড়িয়ে দেওয়া হয়েছে */
+.error {
+    border-bottom: 2.5px wavy #ff0000 !important; /* লাল ঢেউখেলানো মোটা দাগ */
+    background-color: rgba(255, 0, 0, 0.2) !important; /* গাঢ় লাল ব্যাকগ্রাউন্ড */
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+    padding: 1px 2px;
+    border-radius: 3px;
+    display: inline-block; /* যেন আন্ডারলাইন ঠিকমতো বসে */
 }
 
+.error:hover {
+    background-color: rgba(255, 0, 0, 0.35) !important; /* মাউস নিলে আরও গাঢ় হবে */
+}
+
+/* ফ্লোটিং টুলটিপ বা পপ-আপ ডিজাইন */
+#tooltip {
+    position: fixed;
+    background: #1a1a1a; /* ডার্ক থিম পপ-আপ */
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 10000;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    width: 180px;
+    display: none; 
+    border: 1px solid #444;
+}
+
+#tooltip.show {
+    display: block;
+}
+
+#tooltipText {
+    margin: 0 0 10px 0;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+#applySuggest {
+    background: #1e90ff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+#applySuggest:hover {
+    background: #0077e6;
+}
+
+/* মেইন অটো-ফিক্স বাটন */
 #fixButton {
-    background: #3498db;
+    background: #27ae60;
     color: white;
     border: none;
     width: 100%;
     padding: 12px;
+    font-size: 16px;
     font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
     margin-top: 15px;
+    transition: background 0.3s;
+}
+
+#fixButton:hover {
+    background: #219150;
+}
+
+.credit {
+    margin-top: 15px;
+    font-size: 11px;
+    color: #95a5a6;
+    text-align: center;
 }
