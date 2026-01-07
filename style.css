@@ -1,70 +1,62 @@
-/* EngFixer Pro 2.0 - Full Stylesheet */
+/* EngFixer Pro 2.0 - High Visibility Style */
 
 body {
-    width: 380px;
+    width: 400px; /* উইডথ একটু বাড়ালাম যাতে বড় সাজেশন ধরে */
     margin: 0;
     padding: 15px;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background-color: #f4f7f6;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f8f9fa;
 }
 
 .container {
     background: white;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    position: relative;
-}
-
-h1 {
-    font-size: 22px;
-    color: #2c3e50;
-    margin-bottom: 15px;
-    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
 #editor {
     min-height: 200px;
-    max-height: 300px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #ced6e0;
     border-radius: 8px;
-    padding: 12px;
+    padding: 15px;
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.8; /* লাইনের মাঝের গ্যাপ বাড়ালাম যাতে আন্ডারলাইন স্পষ্ট হয় */
     background: #fff;
     outline: none;
-    overflow-y: auto;
     white-space: pre-wrap;
 }
 
-#editor:focus { border-color: #3498db; }
+#editor:focus { border-color: #3742fa; }
 
-#editor:empty:before {
-    content: attr(placeholder);
-    color: #bdc3c7;
-}
-
-/* গ্রামার ভুল হাইলাইট */
+/* --- কালার ফিক্স (সবচেয়ে গুরুত্বপূর্ণ) --- */
 .error {
-    border-bottom: 2.5px wavy #ff4757 !important;
-    background-color: rgba(255, 71, 87, 0.15);
+    border-bottom: 3px solid #ff3f34 !important; /* ঢেউখেলানোর বদলে সলিড লাইন, বেশি স্পষ্ট */
+    background-color: rgba(255, 71, 87, 0.4) !important; /* ব্যাকগ্রাউন্ড এখন অনেক গাঢ় */
+    color: #2f3542; /* টেক্সট কালার কালোই থাকবে */
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: 4px;
+    padding-bottom: 2px;
+    transition: all 0.2s;
 }
 
-/* টুলটিপ পপ-আপ ডিজাইন */
+.error:hover {
+    background-color: rgba(255, 71, 87, 0.6) !important; /* মাউস নিলে আরও লাল হবে */
+    color: white; /* মাউস নিলে টেক্সট সাদা হয়ে যাবে */
+}
+
+/* টুলটিপ ডিজাইন */
 #tooltip {
     position: fixed;
-    background: #1a1a1a;
+    background: #2f3542;
     color: white;
-    padding: 12px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 8px;
     font-size: 14px;
     z-index: 10000;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    width: 200px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    width: 260px; /* রিরাইটের জন্য চওড়া জায়গা */
     display: none;
-    border: 1px solid #444;
 }
 
 #tooltip.show { display: block; }
@@ -72,50 +64,37 @@ h1 {
 .tooltip-header {
     font-size: 11px;
     text-transform: uppercase;
-    color: #9ca3af;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #444;
-    padding-bottom: 4px;
-}
-
-/* রিরাইট বাটন স্টাইল */
-#rewriteOptions {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    color: #dfe4ea;
     margin-bottom: 10px;
-}
-
-.rewrite-btn {
-    background: #2f3542;
-    color: #00d2ff;
-    border: 1px solid #4b5563;
-    padding: 8px;
-    font-size: 13px;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: left;
-    transition: 0.2s;
-}
-
-.rewrite-btn:hover {
-    background: #3e4451;
-    color: #ffffff;
-}
-
-#applySuggest {
-    background: #27ae60;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
+    border-bottom: 1px solid #57606f;
+    padding-bottom: 5px;
     font-weight: bold;
 }
 
+/* রিরাইট বাটনগুলো */
+.rewrite-btn {
+    background: #1e272e;
+    color: #00d2ff;
+    border: 1px solid #485460;
+    padding: 10px;
+    margin-top: 5px;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    display: block;
+    line-height: 1.4;
+}
+
+.rewrite-btn:hover {
+    background: #485460;
+    color: #fff;
+    border-color: #00d2ff;
+}
+
 #fixButton {
-    background: #3498db;
+    background: #3742fa;
     color: white;
     border: none;
     width: 100%;
@@ -125,11 +104,4 @@ h1 {
     border-radius: 8px;
     cursor: pointer;
     margin-top: 15px;
-}
-
-.credit {
-    margin-top: 15px;
-    font-size: 11px;
-    color: #95a5a6;
-    text-align: center;
 }
