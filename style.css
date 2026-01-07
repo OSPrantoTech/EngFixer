@@ -30,10 +30,12 @@ h1 {
     background: white;
     outline: none;
     overflow-y: auto;
+    position: relative;
 }
 
+/* প্লেসহোল্ডার স্টাইল */
 #editor:empty:before {
-    content: "Start typing here...";
+    content: attr(placeholder);
     color: #aaa;
 }
 
@@ -64,21 +66,9 @@ h1 {
     line-height: 1.8;
 }
 
-.error-underline {
-    position: relative;
-    background: linear-gradient(transparent 60%, rgba(255,0,0,0.2) 60%);
-    border-bottom: 2px wavy red;
-    padding-bottom: 2px;
-}
-
-/* এডিটর যখন ফোকাস থাকবে তখন বর্ডার নীল হবে */
-#editor:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
-}
-
-/* আন্ডারলাইন স্টাইল */
+/* লাল ঢেউখেলানো আন্ডারলাইন */
 .error-underline {
     border-bottom: 2px wavy red;
-    cursor: pointer;
+    background-color: rgba(255, 0, 0, 0.05);
+    cursor: help;
 }
