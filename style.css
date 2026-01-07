@@ -1,83 +1,36 @@
-/* পুরো স্টাইলশিট ফিক্স করা হয়েছে */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
     background: #f0f2f5;
     margin: 0;
-    padding: 20px;
 }
-
 .container {
-    max-width: 900px;
-    margin: 0 auto;
     background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-radius: 8px;
 }
-
-h1 {
-    text-align: center;
-    color: #2c3e50;
-}
-
 #editor {
-    min-height: 300px;
+    min-height: 200px;
     border: 2px solid #ddd;
     border-radius: 8px;
-    padding: 20px;
-    margin: 20px 0;
-    font-size: 18px;
-    line-height: 1.6;
-    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    font-size: 16px;
     outline: none;
-    overflow-y: auto;
-    position: relative; /* প্লেসহোল্ডারের পজিশন ঠিক রাখার জন্য */
+    position: relative;
 }
-
-/* প্লেসহোল্ডার লজিক: যখন এডিটর খালি থাকবে তখন এটি দেখাবে */
 #editor:empty:before {
-    content: attr(placeholder); /* index.html এর placeholder অ্যাট্রিবিউট থেকে টেক্সট নিবে */
+    content: attr(placeholder);
     color: #aaa;
-    pointer-events: none; /* প্লেসহোল্ডারের ওপর ক্লিক করা যাবে না */
 }
-
 #fixButton {
     background: #3498db;
     color: white;
     border: none;
-    padding: 12px 30px;
-    font-size: 18px;
-    border-radius: 8px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
     cursor: pointer;
-    display: block;
-    margin: 20px auto;
-    transition: background 0.3s ease;
 }
-
-#fixButton:hover {
-    background: #2980b9;
-}
-
-#fixButton:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-.credit {
-    text-align: center;
-    margin-top: 50px;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    color: #495057;
-    font-size: 15px;
-    line-height: 1.8;
-}
-
-/* গ্রামার ভুলের স্টাইল - লাল ঢেউখেলানো আন্ডারলাইন */
 .error-underline {
     border-bottom: 2px wavy red;
-    background-color: rgba(255, 0, 0, 0.05); /* হালকা লাল আভা */
-    cursor: help;
-    padding-bottom: 1px;
+    background-color: rgba(255, 0, 0, 0.05);
 }
