@@ -1,10 +1,10 @@
-/* EngFixer Pro - Full Stylesheet */
+/* EngFixer Pro 2.0 - Full Stylesheet */
 
 body {
-    width: 380px; /* এক্সটেনশনের পপ-আপ সাইজ ফিক্সড */
+    width: 380px;
     margin: 0;
     padding: 15px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
     background-color: #f4f7f6;
 }
 
@@ -35,79 +35,87 @@ h1 {
     outline: none;
     overflow-y: auto;
     white-space: pre-wrap;
-    position: relative;
 }
 
-#editor:focus {
-    border-color: #3498db;
-}
+#editor:focus { border-color: #3498db; }
 
-/* প্লেসহোল্ডার স্টাইল */
 #editor:empty:before {
     content: attr(placeholder);
     color: #bdc3c7;
-    pointer-events: none;
 }
 
-/* গ্রামার ভুলের হাইলাইট - কালার বাড়িয়ে দেওয়া হয়েছে */
+/* গ্রামার ভুল হাইলাইট */
 .error {
-    border-bottom: 2.5px wavy #ff0000 !important; /* লাল ঢেউখেলানো মোটা দাগ */
-    background-color: rgba(255, 0, 0, 0.2) !important; /* গাঢ় লাল ব্যাকগ্রাউন্ড */
+    border-bottom: 2.5px wavy #ff4757 !important;
+    background-color: rgba(255, 71, 87, 0.15);
     cursor: pointer;
-    transition: background 0.2s ease-in-out;
-    padding: 1px 2px;
     border-radius: 3px;
-    display: inline-block; /* যেন আন্ডারলাইন ঠিকমতো বসে */
 }
 
-.error:hover {
-    background-color: rgba(255, 0, 0, 0.35) !important; /* মাউস নিলে আরও গাঢ় হবে */
-}
-
-/* ফ্লোটিং টুলটিপ বা পপ-আপ ডিজাইন */
+/* টুলটিপ পপ-আপ ডিজাইন */
 #tooltip {
     position: fixed;
-    background: #1a1a1a; /* ডার্ক থিম পপ-আপ */
+    background: #1a1a1a;
     color: white;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 14px;
     z-index: 10000;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-    width: 180px;
-    display: none; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    width: 200px;
+    display: none;
     border: 1px solid #444;
 }
 
-#tooltip.show {
-    display: block;
+#tooltip.show { display: block; }
+
+.tooltip-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 4px;
 }
 
-#tooltipText {
-    margin: 0 0 10px 0;
+/* রিরাইট বাটন স্টাইল */
+#rewriteOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.rewrite-btn {
+    background: #2f3542;
+    color: #00d2ff;
+    border: 1px solid #4b5563;
+    padding: 8px;
+    font-size: 13px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left;
+    transition: 0.2s;
+}
+
+.rewrite-btn:hover {
+    background: #3e4451;
     color: #ffffff;
-    font-weight: 500;
 }
 
 #applySuggest {
-    background: #1e90ff;
+    background: #27ae60;
     color: white;
     border: none;
-    padding: 8px 12px;
+    padding: 8px;
     border-radius: 5px;
     cursor: pointer;
     width: 100%;
     font-weight: bold;
-    transition: background 0.2s;
 }
 
-#applySuggest:hover {
-    background: #0077e6;
-}
-
-/* মেইন অটো-ফিক্স বাটন */
 #fixButton {
-    background: #27ae60;
+    background: #3498db;
     color: white;
     border: none;
     width: 100%;
@@ -117,11 +125,6 @@ h1 {
     border-radius: 8px;
     cursor: pointer;
     margin-top: 15px;
-    transition: background 0.3s;
-}
-
-#fixButton:hover {
-    background: #219150;
 }
 
 .credit {
