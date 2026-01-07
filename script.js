@@ -1,10 +1,12 @@
+// তোমার API Key সরাসরি এখানে দেওয়া হলো
 const API_KEY = 'THJ41LL8XDMVWZLPN9MQOYN7FS17ZZEL';
+
 const editor = document.getElementById('editor');
 const fixButton = document.getElementById('fixButton');
 
 let currentEdits = [];
 
-// ৮০০ মিলিসেকেন্ড পর চেক করবে
+// টাইপ করা শেষ হওয়ার ৮০০ মিলিসেকেন্ড পর চেক করবে
 editor.addEventListener('input', debounce(() => {
     checkText();
 }, 800));
@@ -12,7 +14,6 @@ editor.addEventListener('input', debounce(() => {
 async function checkText() {
     const text = editor.innerText.trim();
     
-    // টেক্সট না থাকলে সব পরিষ্কার করে দেবে
     if (text.length === 0) {
         currentEdits = [];
         return;
@@ -25,15 +26,16 @@ async function checkText() {
             body: JSON.stringify({
                 key: API_KEY,
                 text: text,
-                session_id: 'ospranto-session'
+                session_id: 'ospranto-checker'
             })
         });
 
         const data = await response.json();
         currentEdits = data.edits || [];
 
-        // এরর থাকলে আন্ডারলাইন দেখাবে
-        highlightErrors();
+        if (currentEdits.length > 0) {
+            highlightErrors();
+        }
     } catch (err) {
         console.error('API Error:', err);
     }
@@ -44,7 +46,7 @@ function highlightErrors() {
     let html = '';
     let lastIndex = 0;
 
-    // এডিটগুলো স্টার্ট ইনডেক্স অনুযায়ী সাজানো
+    // এররগুলো ইনডেক্স অনুযায়ী সাজানো
     const sortedEdits = [...currentEdits].sort((a, b) => a.start - b.start);
 
     sortedEdits.forEach(edit => {
@@ -52,37 +54,40 @@ function highlightErrors() {
         const end = edit.end;
         const replacement = edit.replacement || '';
 
-        // ভুলের আগের অংশ যোগ করা
+        // ভুলের আগের টেক্সট
         html += escapeHtml(text.substring(lastIndex, start));
-        // ভুল শব্দটিকে স্প্যান দিয়ে ঘিরে দেওয়া
+        // ভুলের টেক্সট আন্ডারলাইনসহ
         html += `<span class="error-underline" data-replacement="${escapeHtml(replacement)}">${escapeHtml(text.substring(start, end))}</span>`;
         lastIndex = end;
     });
 
-    // বাকি অংশ যোগ করা
+    // বাকি টেক্সট
     html += escapeHtml(text.substring(lastIndex));
     
-    // শুধুমাত্র তখনই আপডেট করবে যদি পরিবর্তন থাকে
-    if (currentEdits.length > 0) {
-        editor.innerHTML = html;
-        placeCaretAtEnd(editor); // কার্সার শেষে নিয়ে যাবে
+    // এডিটর আপডেট এবং কার্সার পজিশন ঠিক করা
+    editor.innerHTML = html;
+    placeCaretAtEnd(editor);
+}
+
+// কার্সারকে সবসময় টেক্সটের শেষে রাখার ফাংশন
+function placeCaretAtEnd(el) {
+    el.focus();
+    if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
     }
 }
 
-function placeCaretAtEnd(el) {
-    el.focus();
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    range.collapse(false);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-}
-
+// অটো ফিক্স বাটন লজিক
 fixButton.addEventListener('click', () => {
     const underlines = document.querySelectorAll('.error-underline');
+    
     if (underlines.length === 0) {
-        alert('অসাধারণ! কোনো ভুল নেই। 🎉');
+        alert('কোনো ভুল পাওয়া যায়নি! 🎉');
         return;
     }
 
@@ -92,9 +97,9 @@ fixButton.addEventListener('click', () => {
             span.outerHTML = replacement;
         }
     });
-    
+
     currentEdits = [];
-    alert('সব ভুল ঠিক করা হয়েছে! ✨');
+    alert('সবগুলো ভুল অটো-ফিক্স করা হয়েছে! ✨');
 });
 
 function escapeHtml(text) {
