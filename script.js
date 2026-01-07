@@ -107,7 +107,7 @@ function setCaretPosition(el, offset) {
     let sel = window.getSelection();
     let charCount = 0;
     let found = false;
-
+    
     function traverse(node) {
         if (found) return;
         if (node.nodeType == 3) {
@@ -124,9 +124,9 @@ function setCaretPosition(el, offset) {
             }
         }
     }
-
+    
     traverse(el);
-
+    
     if (found) {
         range.collapse(true);
         sel.removeAllRanges();
