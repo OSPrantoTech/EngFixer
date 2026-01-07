@@ -1,20 +1,29 @@
-const API_KEY = 'YOUR_SAPLING_API_KEY_HERE'; // এখানে তোমার API key বসাও
+// Vercel/Netlify থেকে environment variable নিবে
+const API_KEY = import.meta.env?.VITE_SAPLING_API_KEY || process.env.SAPLING_API_KEY || '';
+
 const editor = document.getElementById('editor');
 const fixButton = document.getElementById('fixButton');
 
-// রিয়েল-টাইমে চেক করার জন্য input event
+if (!API_KEY) {
+    editor.innerHTML = '<p style="color:red; text-align:center;">Error: API key not found. Please set VITE_SAPLING_API_KEY in environment variables.</p>';
+    fixButton.disabled = true;
+}
+
+let currentEdits = [];
+
 editor.addEventListener('input', debounce(checkText, 800));
 
 async function checkText() {
     const text = editor.innerText.trim();
-    if (text.length === 0) return;
+    if (text.length === 0 || !API_KEY) {
+        removeAllUnderlines();
+        return;
+    }
 
     try {
         const response = await fetch('https://api.sapling.ai/api/v1/edits', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 key: API_KEY,
                 text: text,
@@ -23,61 +32,62 @@ async function checkText() {
         });
 
         const data = await response.json();
-        
-        // পুরানো underlines সাফ করো
+        currentEdits = data.edits || [];
+
         removeAllUnderlines();
 
-        // নতুন errors underline করো
-        if (data.edits && data.edits.length > 0) {
-            const edits = data.edits.sort((a, b) => b.start - a.start); // reverse order to avoid index shift
-
+        if (currentEdits.length > 0) {
             let html = editor.innerHTML;
-            for (const edit of edits) {
+            const sortedEdits = [...currentEdits].sort((a, b) => b.start - a.start);
+
+            for (const edit of sortedEdits) {
                 const start = edit.start;
                 const end = edit.end;
-                const errorText = html.substring(start, end);
-                const replacement = `<span class="error-underline" data-replacement="${edit.replacement}">${errorText}</span>`;
-                html = html.substring(0, start) + replacement + html.substring(end);
+                const errorText = editor.innerText.substring(start, end);
+                const replacement = edit.replacement || errorText;
+
+                const span = `<span class="error-underline" data-replacement="${escapeHtml(replacement)}">${escapeHtml(errorText)}</span>`;
+                html = html.substring(0, start) + span + html.substring(end);
             }
             editor.innerHTML = html;
         }
     } catch (err) {
-        console.error('Error checking text:', err);
+        console.error('API Error:', err);
     }
 }
 
-// সব underlines সরানো
 function removeAllUnderlines() {
-    const underlines = editor.querySelectorAll('.error-underline');
-    underlines.forEach(span => {
-        span.outerHTML = span.innerHTML; // remove span but keep text
+    document.querySelectorAll('.error-underline').forEach(span => {
+        span.outerHTML = span.innerHTML;
     });
 }
 
-// Auto Fix All
-fixButton.addEventListener('click', async () => {
-    await checkText(); // প্রথমে latest edits নিয়ে আসো
-    const underlines = editor.querySelectorAll('.error-underline');
-    if (underlines.length === 0) {
-        alert('No errors found! Great job! 🎉');
+fixButton.addEventListener('click', () => {
+    if (currentEdits.length === 0) {
+        alert('No errors found! Your writing is perfect! 🎉');
         return;
     }
 
-    // সব replacement অ্যাপ্লাই করো (reverse order)
-    underlines.forEach(span => {
+    document.querySelectorAll('.error-underline').forEach(span => {
         const replacement = span.getAttribute('data-replacement');
         if (replacement) {
             span.outerHTML = replacement;
         }
     });
 
+    currentEdits = [];
     alert('All errors fixed automatically! ✨');
 });
 
-// Debounce ফাংশন যাতে প্রতি টাইপে API কল না যায়
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 function debounce(func, delay) {
     let timeout;
-    return function() {
+    return () => {
         clearTimeout(timeout);
         timeout = setTimeout(func, delay);
     };
