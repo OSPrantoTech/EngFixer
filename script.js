@@ -52,7 +52,9 @@ function highlightErrors(matches) {
     editor.innerHTML = html;
 
     // Restore cursor position
-    setCaretPosition(editor, caretOffset);
+    setTimeout(() => {
+        setCaretPosition(editor, caretOffset);
+    }, 0);
 }
 
 document.addEventListener('click', (e) => {
