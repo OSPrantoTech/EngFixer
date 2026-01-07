@@ -13,13 +13,13 @@ async function checkGrammar() {
     if (!text.trim()) return;
 
     try {
-        // এখানে MORPHOLOGY_RULE ব্যবহার করে বানান ভুল এড়িয়ে শুধু গ্রামার ও ক্যাপিটালাইজেশন ধরা হচ্ছে
+        // Using MORPHOLOGY_RULE to avoid spelling errors and focus on grammar and capitalization.
         const response = await fetch('https://api.languagetool.org/v2/check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `text=${encodeURIComponent(text)}&language=en-US&disabledRules=UPPERCASE_SENTENCE_START,SPELLCHECKING`
+            body: `text=${encodeURIComponent(text)}&language=en-US&disabledRules=SPELLCHECKING`
         });
-        // SPELLCHECKING ডিজেবল করায় এটি আর নাম বদলাবে না, কিন্তু গ্রামার ধরবে
+        // SPELLCHECKING is disabled, so it won't change names but will catch grammar mistakes.
 
         const data = await response.json();
         highlightErrors(data.matches);
@@ -29,6 +29,9 @@ async function checkGrammar() {
 }
 
 function highlightErrors(matches) {
+    // Save cursor position
+    const caretOffset = getCaretCharacterOffsetWithin(editor);
+
     const text = editor.innerText;
     let html = '';
     let lastIndex = 0;
@@ -39,23 +42,17 @@ function highlightErrors(matches) {
         const suggestion = match.replacements[0]?.value || "";
 
         html += escapeHtml(text.substring(lastIndex, start));
-        // এরর স্প্যান যোগ
+        // Add error span
         html += `<span class="error" data-suggest="${escapeHtml(suggestion)}">${escapeHtml(text.substring(start, end))}</span>`;
         lastIndex = end;
     });
 
     html += escapeHtml(text.substring(lastIndex));
     
-    // কার্সার পজিশন ঠিক রাখা
-    const selection = window.getSelection();
-    let offset = 0;
-    if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        offset = range.startOffset;
-    }
-
     editor.innerHTML = html;
-    placeCaretAtEnd(editor);
+
+    // Restore cursor position
+    setCaretPosition(editor, caretOffset);
 }
 
 document.addEventListener('click', (e) => {
@@ -87,6 +84,56 @@ document.getElementById('fixButton').addEventListener('click', () => {
     });
     tooltip.classList.remove('show');
 });
+
+function getCaretCharacterOffsetWithin(element) {
+    let caretOffset = 0;
+    const doc = element.ownerDocument || element.document;
+    const win = doc.defaultView || doc.parentWindow;
+    const sel = win.getSelection();
+    if (sel.rangeCount > 0) {
+        const range = win.getSelection().getRangeAt(0);
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(element);
+        preCaretRange.setEnd(range.startContainer, range.startOffset);
+        caretOffset = preCaretRange.toString().length;
+    }
+    return caretOffset;
+}
+
+function setCaretPosition(el, offset) {
+    let range = document.createRange();
+    let sel = window.getSelection();
+    let charCount = 0;
+    let found = false;
+    
+    function traverse(node) {
+        if (found) return;
+        if (node.nodeType == 3) {
+            let nextCharCount = charCount + node.length;
+            if (offset >= charCount && offset <= nextCharCount) {
+                range.setStart(node, offset - charCount);
+                found = true;
+            }
+            charCount = nextCharCount;
+        } else if (node.nodeType == 1) {
+            for (var i = 0; i < node.childNodes.length; i++) {
+                traverse(node.childNodes[i]);
+                if (found) break;
+            }
+        }
+    }
+    
+    traverse(el);
+    
+    if (found) {
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    } else {
+        placeCaretAtEnd(el);
+    }
+}
+
 
 function placeCaretAtEnd(el) {
     el.focus();
