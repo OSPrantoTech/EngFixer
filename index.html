@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EngFixer</title>
+    <title>EngFixer Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1 style="text-align:center; font-size: 24px;">EngFixer</h1>
-        <div id="editor" contenteditable="true" spellcheck="false"></div>
-        <button id="fixButton">Auto Fix Errors</button>
-        <div class="credit" style="text-align:center; margin-top:15px; font-size:12px;">
-            OSPranto Tech
+        <h1>EngFixer Pro</h1>
+        <div id="editor" contenteditable="true" spellcheck="false" placeholder="Start typing here..."></div>
+        <button id="fixButton">Auto Fix All</button>
+        
+        <div id="tooltip" class="hidden">
+            <p id="tooltipText"></p>
+            <button id="applySuggest">Apply Suggestion</button>
         </div>
+
+        <div class="credit">Developed by OSPranto Tech</div>
     </div>
     <script src="script.js"></script>
 </body>
