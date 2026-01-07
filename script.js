@@ -1,6 +1,4 @@
-// Vercel/Netlify থেকে environment variable নিবে
-const API_KEY = import.meta.env?.VITE_SAPLING_API_KEY || process.env.SAPLING_API_KEY || '';
-
+const API_KEY = 'THJ41LL8XDMVWZLPN9MQOYN7FS17ZZEL';
 const editor = document.getElementById('editor');
 const fixButton = document.getElementById('fixButton');
 
