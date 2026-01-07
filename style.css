@@ -1,60 +1,100 @@
-/* EngFixer Pro 2.0.0 - Stable Styles */
+/* EngFixer Pro 2.0 - Absolute Glitch Fix */
+
+body {
+    width: 400px;
+    margin: 0;
+    padding: 15px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+    font-size: 24px;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 15px;
+}
 
 #editor {
     min-height: 200px;
-    border: 2px solid #ced4da;
+    max-height: 350px;
+    border: 2px solid #dfe6e9;
     border-radius: 8px;
-    padding: 15px;
+    padding: 12px;
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.5; /* লাইন হাইট ফিক্সড */
+    background: #fff;
     outline: none;
+    overflow-y: auto;
     white-space: pre-wrap !important;
-    word-break: break-word !important;
+    word-wrap: break-word !important;
+    color: #333;
+    display: block !important;
 }
 
-/* গ্লিচ ফিক্স করার জন্য ইনলাইন এবং সলিড কালার */
+/* --- গ্লিচ ফিক্সের মূল জায়গা --- */
 .error {
-    display: inline !important;
-    background-color: #ffeaa7 !important; /* হালকা হলুদ ব্যাকগ্রাউন্ড যা চোখে পড়ে */
-    border-bottom: 2px solid #fab1a0 !important; /* হালকা লাল বর্ডার */
-    padding: 2px 0;
+    display: inline !important; /* ব্লক হওয়া একদম বন্ধ করবে */
+    background-color: rgba(255, 71, 87, 0.3) !important; /* গাঢ় লাল যেন বোঝা যায় */
+    border-bottom: 2px solid #ff4757 !important;
+    padding: 0 !important; /* প্যাডিং থাকলে টেক্সট নিচে নেমে যায় */
+    margin: 0 !important;
+    border-radius: 2px;
     cursor: pointer;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
 }
 
-.error:hover {
-    background-color: #fab1a0 !important;
-    color: white;
-}
-
-/* টুলটিপ এবং রিরাইট বাটন */
 #tooltip {
     position: fixed;
     background: #2d3436;
     color: white;
     padding: 12px;
     border-radius: 8px;
-    width: 250px;
-    z-index: 1000;
+    font-size: 13px;
+    z-index: 99999;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    width: 240px;
     display: none;
 }
 
+#tooltip.show { display: block; }
+
 .rewrite-btn {
-    background: #636e72;
-    color: #55efc4;
-    border: 1px solid #b2bec3;
+    background: #353b48;
+    color: #7bed9f;
+    border: 1px solid #636e72;
     padding: 8px;
     margin-top: 5px;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: pointer;
     width: 100%;
     text-align: left;
+    display: block;
+}
+
+#fixButton {
+    background: #0984e3;
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
     cursor: pointer;
-    border-radius: 4px;
+    margin-top: 15px;
 }
 
-.rewrite-btn:hover {
-    background: #55efc4;
-    color: #2d3436;
-}
-
+/* ফুটার স্টাইল */
 .credit {
     margin-top: 20px;
     font-size: 12px;
