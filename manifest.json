@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "OSPranto Grammar Checker",
+  "version": "1.0",
+  "description": "Check your English grammar easily by OSPranto Tech",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "permissions": ["activeTab"]
+}
