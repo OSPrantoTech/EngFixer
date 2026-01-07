@@ -1,9 +1,13 @@
+/* EngFixer Pro 2.0 - Full Logic */
+
 const editor = document.getElementById('editor');
 const tooltip = document.getElementById('tooltip');
 const tooltipText = document.getElementById('tooltipText');
+const rewriteOptions = document.getElementById('rewriteOptions');
 const applySuggest = document.getElementById('applySuggest');
 let activeSpan = null;
 
+// টাইপ করার সময় গ্রামার চেক
 editor.addEventListener('input', debounce(() => {
     checkGrammar();
 }, 1200));
@@ -13,14 +17,11 @@ async function checkGrammar() {
     if (!text.trim()) return;
 
     try {
-        // Using MORPHOLOGY_RULE to avoid spelling errors and focus on grammar and capitalization.
         const response = await fetch('https://api.languagetool.org/v2/check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `text=${encodeURIComponent(text)}&language=en-US&disabledRules=SPELLCHECKING`
+            body: `text=${encodeURIComponent(text)}&language=en-US`
         });
-        // SPELLCHECKING is disabled, so it won't change names but will catch grammar mistakes.
-
         const data = await response.json();
         highlightErrors(data.matches);
     } catch (err) {
@@ -29,9 +30,6 @@ async function checkGrammar() {
 }
 
 function highlightErrors(matches) {
-    // Save cursor position
-    const caretOffset = getCaretCharacterOffsetWithin(editor);
-
     const text = editor.innerText;
     let html = '';
     let lastIndex = 0;
@@ -39,27 +37,52 @@ function highlightErrors(matches) {
     matches.forEach(match => {
         const start = match.offset;
         const end = match.offset + match.length;
-        const suggestion = match.replacements[0]?.value || "";
+        
+        // সব সাজেশনগুলোকে একটি স্ট্রিং হিসেবে সেভ করা
+        const suggestions = JSON.stringify(match.replacements.slice(0, 3));
 
         html += escapeHtml(text.substring(lastIndex, start));
-        // Add error span
-        html += `<span class="error" data-suggest="${escapeHtml(suggestion)}">${escapeHtml(text.substring(start, end))}</span>`;
+        html += `<span class="error" data-all-suggest='${suggestions}'>${escapeHtml(text.substring(start, end))}</span>`;
         lastIndex = end;
     });
 
     html += escapeHtml(text.substring(lastIndex));
     
-    editor.innerHTML = html;
+    // কার্সার পজিশন ঠিক রেখে আপডেট
+    const selection = window.getSelection();
+    let offset = 0;
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        offset = range.startOffset;
+    }
 
-    // Restore cursor position
-    setCaretPosition(editor, caretOffset);
+    editor.innerHTML = html;
+    placeCaretAtEnd(editor);
 }
 
+// ক্লিক করলে রিরাইট পপ-আপ দেখানো
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('error')) {
         activeSpan = e.target;
         const rect = activeSpan.getBoundingClientRect();
-        tooltipText.innerText = `Suggested: ${activeSpan.dataset.suggest}`;
+        
+        // সাজেশন বাটন তৈরি করা
+        const suggestions = JSON.parse(activeSpan.dataset.allSuggest || "[]");
+        rewriteOptions.innerHTML = ''; 
+
+        suggestions.forEach(s => {
+            const btn = document.createElement('button');
+            btn.className = 'rewrite-btn';
+            btn.innerText = `Rewrite: "${s.value}"`;
+            btn.onclick = (event) => {
+                event.stopPropagation();
+                activeSpan.outerHTML = s.value;
+                tooltip.classList.remove('show');
+            };
+            rewriteOptions.appendChild(btn);
+        });
+
+        tooltipText.innerText = suggestions.length > 0 ? "Choose a better way:" : "No rewrites found.";
         tooltip.style.left = `${rect.left}px`;
         tooltip.style.top = `${rect.bottom + 5}px`;
         tooltip.classList.add('show');
@@ -68,72 +91,15 @@ document.addEventListener('click', (e) => {
     }
 });
 
-applySuggest.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (activeSpan && activeSpan.dataset.suggest) {
-        activeSpan.outerHTML = activeSpan.dataset.suggest;
-        tooltip.classList.remove('show');
-        activeSpan = null;
-    }
-});
-
+// মেইন ফিক্স বাটন
 document.getElementById('fixButton').addEventListener('click', () => {
     const errors = document.querySelectorAll('.error');
     errors.forEach(span => {
-        if (span.dataset.suggest) span.outerHTML = span.dataset.suggest;
+        const suggestions = JSON.parse(span.dataset.allSuggest || "[]");
+        if (suggestions.length > 0) span.outerHTML = suggestions[0].value;
     });
     tooltip.classList.remove('show');
 });
-
-function getCaretCharacterOffsetWithin(element) {
-    let caretOffset = 0;
-    const doc = element.ownerDocument || element.document;
-    const win = doc.defaultView || doc.parentWindow;
-    const sel = win.getSelection();
-    if (sel.rangeCount > 0) {
-        const range = win.getSelection().getRangeAt(0);
-        const preCaretRange = range.cloneRange();
-        preCaretRange.selectNodeContents(element);
-        preCaretRange.setEnd(range.startContainer, range.startOffset);
-        caretOffset = preCaretRange.toString().length;
-    }
-    return caretOffset;
-}
-
-function setCaretPosition(el, offset) {
-    let range = document.createRange();
-    let sel = window.getSelection();
-    let charCount = 0;
-    let found = false;
-    
-    function traverse(node) {
-        if (found) return;
-        if (node.nodeType == 3) {
-            let nextCharCount = charCount + node.length;
-            if (offset >= charCount && offset <= nextCharCount) {
-                range.setStart(node, offset - charCount);
-                found = true;
-            }
-            charCount = nextCharCount;
-        } else if (node.nodeType == 1) {
-            for (var i = 0; i < node.childNodes.length; i++) {
-                traverse(node.childNodes[i]);
-                if (found) break;
-            }
-        }
-    }
-    
-    traverse(el);
-    
-    if (found) {
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    } else {
-        placeCaretAtEnd(el);
-    }
-}
-
 
 function placeCaretAtEnd(el) {
     el.focus();
