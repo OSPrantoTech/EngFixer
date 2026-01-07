@@ -1,76 +1,92 @@
-const API_KEY = 'THJ41LL8XDMVWZLPN9MQOYN7FS17ZZEL';
 const editor = document.getElementById('editor');
-const fixButton = document.getElementById('fixButton');
+const tooltip = document.getElementById('tooltip');
+const tooltipText = document.getElementById('tooltipText');
+const applySuggest = document.getElementById('applySuggest');
+let activeSpan = null;
 
-let currentEdits = [];
-
-// এক্সটেনশন খুললেই কার্সার এডিটরে যাবে
-window.onload = () => editor.focus();
-
-// ৮০০ মিলিসেকেন্ড পর চেক করবে যাতে টাইপ করার সময় ডিস্টার্ব না হয়
 editor.addEventListener('input', debounce(() => {
-    checkText();
-}, 800));
+    checkGrammar();
+}, 1200));
 
-async function checkText() {
-    const text = editor.innerText.trim();
-    if (text.length === 0) {
-        currentEdits = [];
-        return;
-    }
+async function checkGrammar() {
+    const text = editor.innerText;
+    if (!text.trim()) return;
 
     try {
-        const response = await fetch('https://api.sapling.ai/api/v1/edits', {
+        // এখানে MORPHOLOGY_RULE ব্যবহার করে বানান ভুল এড়িয়ে শুধু গ্রামার ও ক্যাপিটালাইজেশন ধরা হচ্ছে
+        const response = await fetch('https://api.languagetool.org/v2/check', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                key: API_KEY,
-                text: text,
-                session_id: 'engfixer-session'
-            })
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `text=${encodeURIComponent(text)}&language=en-US&disabledRules=UPPERCASE_SENTENCE_START,SPELLCHECKING`
         });
+        // SPELLCHECKING ডিজেবল করায় এটি আর নাম বদলাবে না, কিন্তু গ্রামার ধরবে
 
         const data = await response.json();
-        currentEdits = data.edits || [];
-        applyHighlights();
+        highlightErrors(data.matches);
     } catch (err) {
         console.error('API Error:', err);
     }
 }
 
-function applyHighlights() {
+function highlightErrors(matches) {
     const text = editor.innerText;
-    if (currentEdits.length === 0) return;
-
     let html = '';
     let lastIndex = 0;
 
-    // এডিটগুলো সাজিয়ে নেওয়া
-    const sortedEdits = [...currentEdits].sort((a, b) => a.start - b.start);
-
-    sortedEdits.forEach(edit => {
-        const start = edit.start;
-        const end = edit.end;
-        const replacement = edit.replacement || '';
+    matches.forEach(match => {
+        const start = match.offset;
+        const end = match.offset + match.length;
+        const suggestion = match.replacements[0]?.value || "";
 
         html += escapeHtml(text.substring(lastIndex, start));
-        // আন্ডারলাইন স্প্যান
-        html += `<span class="error-underline" data-replacement="${escapeHtml(replacement)}">${escapeHtml(text.substring(start, end))}</span>`;
+        // এরর স্প্যান যোগ
+        html += `<span class="error" data-suggest="${escapeHtml(suggestion)}">${escapeHtml(text.substring(start, end))}</span>`;
         lastIndex = end;
     });
 
     html += escapeHtml(text.substring(lastIndex));
     
-    // সিলেকশন বা কার্সার পজিশন সেভ করা
+    // কার্সার পজিশন ঠিক রাখা
     const selection = window.getSelection();
-    const range = selection.getRangeAt(0);
-    const offset = range.startOffset;
+    let offset = 0;
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        offset = range.startOffset;
+    }
 
     editor.innerHTML = html;
-
-    // কার্সারকে সঠিক জায়গায় ফিরিয়ে আনা
     placeCaretAtEnd(editor);
 }
+
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('error')) {
+        activeSpan = e.target;
+        const rect = activeSpan.getBoundingClientRect();
+        tooltipText.innerText = `Suggested: ${activeSpan.dataset.suggest}`;
+        tooltip.style.left = `${rect.left}px`;
+        tooltip.style.top = `${rect.bottom + 5}px`;
+        tooltip.classList.add('show');
+    } else if (!tooltip.contains(e.target)) {
+        tooltip.classList.remove('show');
+    }
+});
+
+applySuggest.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (activeSpan && activeSpan.dataset.suggest) {
+        activeSpan.outerHTML = activeSpan.dataset.suggest;
+        tooltip.classList.remove('show');
+        activeSpan = null;
+    }
+});
+
+document.getElementById('fixButton').addEventListener('click', () => {
+    const errors = document.querySelectorAll('.error');
+    errors.forEach(span => {
+        if (span.dataset.suggest) span.outerHTML = span.dataset.suggest;
+    });
+    tooltip.classList.remove('show');
+});
 
 function placeCaretAtEnd(el) {
     el.focus();
@@ -81,17 +97,6 @@ function placeCaretAtEnd(el) {
     sel.removeAllRanges();
     sel.addRange(range);
 }
-
-fixButton.addEventListener('click', () => {
-    const underlines = document.querySelectorAll('.error-underline');
-    if (underlines.length === 0) return;
-
-    underlines.forEach(span => {
-        const replacement = span.getAttribute('data-replacement');
-        if (replacement) span.outerHTML = replacement;
-    });
-    currentEdits = [];
-});
 
 function escapeHtml(text) {
     const div = document.createElement('div');
