@@ -1,3 +1,4 @@
+/* পুরো স্টাইলশিট ফিক্স করা হয়েছে */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f0f2f5;
@@ -30,13 +31,14 @@ h1 {
     background: white;
     outline: none;
     overflow-y: auto;
-    position: relative;
+    position: relative; /* প্লেসহোল্ডারের পজিশন ঠিক রাখার জন্য */
 }
 
-/* প্লেসহোল্ডার স্টাইল */
+/* প্লেসহোল্ডার লজিক: যখন এডিটর খালি থাকবে তখন এটি দেখাবে */
 #editor:empty:before {
-    content: attr(placeholder);
+    content: attr(placeholder); /* index.html এর placeholder অ্যাট্রিবিউট থেকে টেক্সট নিবে */
     color: #aaa;
+    pointer-events: none; /* প্লেসহোল্ডারের ওপর ক্লিক করা যাবে না */
 }
 
 #fixButton {
@@ -49,10 +51,16 @@ h1 {
     cursor: pointer;
     display: block;
     margin: 20px auto;
+    transition: background 0.3s ease;
 }
 
 #fixButton:hover {
     background: #2980b9;
+}
+
+#fixButton:disabled {
+    background: #ccc;
+    cursor: not-allowed;
 }
 
 .credit {
@@ -66,9 +74,10 @@ h1 {
     line-height: 1.8;
 }
 
-/* লাল ঢেউখেলানো আন্ডারলাইন */
+/* গ্রামার ভুলের স্টাইল - লাল ঢেউখেলানো আন্ডারলাইন */
 .error-underline {
     border-bottom: 2px wavy red;
-    background-color: rgba(255, 0, 0, 0.05);
+    background-color: rgba(255, 0, 0, 0.05); /* হালকা লাল আভা */
     cursor: help;
+    padding-bottom: 1px;
 }
