@@ -70,3 +70,15 @@ h1 {
     border-bottom: 2px wavy red;
     padding-bottom: 2px;
 }
+
+/* এডিটর যখন ফোকাস থাকবে তখন বর্ডার নীল হবে */
+#editor:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+}
+
+/* আন্ডারলাইন স্টাইল */
+.error-underline {
+    border-bottom: 2px wavy red;
+    cursor: pointer;
+}
