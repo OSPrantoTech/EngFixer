@@ -1,0 +1,70 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+}
+
+#editor {
+    min-height: 300px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    font-size: 18px;
+    line-height: 1.6;
+    background: white;
+    outline: none;
+    overflow-y: auto;
+}
+
+#editor:empty:before {
+    content: "Start typing here...";
+    color: #aaa;
+}
+
+#fixButton {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+}
+
+#fixButton:hover {
+    background: #2980b9;
+}
+
+.credit {
+    text-align: center;
+    margin-top: 50px;
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+/* Red wavy underline for errors */
+.error-underline {
+    position: relative;
+    background: linear-gradient(transparent 60%, rgba(255,0,0,0.3) 60%);
+    border-bottom: 2px solid red;
+    border-radius: 2px;
+    padding-bottom: 2px;
+}
