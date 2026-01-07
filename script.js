@@ -1,11 +1,11 @@
-/* EngFixer Pro 2.0 - Final Stable Script */
+/* EngFixer Pro 2.0.0 - Full Sentence Rewrite & Stability Fix */
 
 const editor = document.getElementById('editor');
 const tooltip = document.getElementById('tooltip');
 const rewriteOptions = document.getElementById('rewriteOptions');
 let activeSpan = null;
 
-// ১ সেকেন্ড টাইপিং বিরতিতে চেক হবে
+// টাইপিং বিরতিতে চেক করা
 editor.addEventListener('input', debounce(() => {
     checkGrammar();
 }, 1000));
@@ -15,7 +15,7 @@ async function checkGrammar() {
     if (!text.trim()) return;
 
     try {
-        // level=picky এবং কোনো ক্যাটাগরি ডিজেবল না করে ফুল চেক
+        // level=picky পুরো বাক্য গঠন এবং স্টাইল সাজেশন নিয়ে আসে
         const response = await fetch('https://api.languagetool.org/v2/check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -38,38 +38,39 @@ function highlightErrors(matches) {
         const start = match.offset;
         const end = match.offset + match.length;
         
-        // সব সাজেশনগুলোকে একটি ফিল্টারড লিস্টে রাখা
-        const suggestions = match.replacements.map(r => r.value).slice(0, 3);
+        // সব সাজেশন এবং রিফ্রেজিং অপশনগুলো সংগ্রহ করা
+        const suggestions = match.replacements.map(r => r.value).slice(0, 5); 
         const suggestionAttr = encodeURIComponent(JSON.stringify(suggestions));
 
         html += escapeHtml(text.substring(lastIndex, start));
-        // এরর স্প্যান - এখানে !important স্টাইল দিয়ে গ্লিচ ঠেকানো হয়েছে
+        // গ্লিচ এড়াতে ইনলাইন স্প্যান ব্যবহার
         html += `<span class="error" data-suggestions="${suggestionAttr}">${escapeHtml(text.substring(start, end))}</span>`;
         lastIndex = end;
     });
 
     html += escapeHtml(text.substring(lastIndex));
     
-    // কার্সার পজিশন ঠিক রাখা
+    // এডিটর আপডেট করার সময় কার্সার হারানো রোধ করা
     const selection = window.getSelection();
+    let range = null;
     if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const preOffset = range.startOffset;
-        editor.innerHTML = html;
-        // কার্সারকে আগের জায়গায় ফিরিয়ে নেওয়ার চেষ্টা
+        range = selection.getRangeAt(0);
+    }
+
+    editor.innerHTML = html;
+    
+    if (range) {
         placeCaretAtEnd(editor);
-    } else {
-        editor.innerHTML = html;
     }
 }
 
-// ক্লিক করলে রিরাইট অপশন পপ-আপ হবে
+// ক্লিক করলে রিরাইট এবং সাজেশন পপ-আপ
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('error')) {
         activeSpan = e.target;
         const rect = activeSpan.getBoundingClientRect();
         
-        // সাজেশন ডাটা ডিকোড করা
+        // সাজেশনের তালিকা ডিকোড করা
         const suggestions = JSON.parse(decodeURIComponent(activeSpan.dataset.suggestions || "[]"));
         rewriteOptions.innerHTML = ''; 
 
@@ -77,27 +78,31 @@ document.addEventListener('click', (e) => {
             suggestions.forEach(s => {
                 const btn = document.createElement('button');
                 btn.className = 'rewrite-btn';
-                // বড় সাজেশন হলে Rephrase আর ছোট হলে Fix দেখানো হবে
-                btn.innerText = s.length > activeSpan.innerText.length ? `Rephrase: ${s}` : `Fix: ${s}`;
+                
+                // যদি সাজেশনে বড় বাক্য থাকে তবে 'Rewrite' দেখাবে
+                const isSentence = s.split(' ').length > 2;
+                btn.innerHTML = `<strong>${isSentence ? 'Rewrite' : 'Fix'}:</strong> ${s}`;
+                
                 btn.onclick = (event) => {
                     event.stopPropagation();
                     activeSpan.outerHTML = s;
                     tooltip.classList.remove('show');
+                    checkGrammar(); // পরিবর্তনের পর আবার চেক
                 };
                 rewriteOptions.appendChild(btn);
             });
         }
 
-        // পজিশন সেট করা
+        // টুলটিপ পজিশনিং
         tooltip.style.left = `${rect.left}px`;
-        tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        tooltip.style.top = `${rect.bottom + window.scrollY + 8}px`;
         tooltip.classList.add('show');
     } else if (!tooltip.contains(e.target)) {
         tooltip.classList.remove('show');
     }
 });
 
-// "Auto Fix All Errors" বাটন ফিক্স
+// এক ক্লিকে সব ফিক্স করা
 document.getElementById('fixButton').addEventListener('click', () => {
     const errors = document.querySelectorAll('.error');
     if (errors.length === 0) return;
@@ -105,7 +110,6 @@ document.getElementById('fixButton').addEventListener('click', () => {
     errors.forEach(span => {
         const suggestions = JSON.parse(decodeURIComponent(span.dataset.suggestions || "[]"));
         if (suggestions.length > 0) {
-            // প্রথম সাজেশনটি দিয়ে অটো রিপ্লেস
             span.outerHTML = suggestions[0];
         }
     });
@@ -114,14 +118,12 @@ document.getElementById('fixButton').addEventListener('click', () => {
 
 function placeCaretAtEnd(el) {
     el.focus();
-    if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        range.collapse(false);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
 }
 
 function escapeHtml(text) {
